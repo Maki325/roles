@@ -1,0 +1,6 @@
+# Created by http://www.gitignore.io
+
+.classpath
+.project
+/.settings
+command_stuff.txt
