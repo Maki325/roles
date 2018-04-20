@@ -1,6 +1,7 @@
 package maki325.roles.events;
 
-import org.bukkit.ChatColor;
+import java.util.UUID;
+
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -15,14 +16,11 @@ public class PlayerJoinEvent implements Listener {
 	@EventHandler(priority = EventPriority.HIGHEST)
     public void onPlayerJoin(PlayerLoginEvent event) {
         Player p = event.getPlayer();
-        if(Roles.instance.players.containsKey(p.getUniqueId())) {
-        	p.setDisplayName(ChatColor.translateAlternateColorCodes('&', Roles.instance.rolesPrefix.get(Roles.instance.playerRoles.get(p.getUniqueId()))) + " " + p.getName());
-        	p.setPlayerListName(ChatColor.translateAlternateColorCodes('&', Roles.instance.rolesPrefix.get(Roles.instance.playerRoles.get(p.getUniqueId()))) + " " + p.getName());
-        } else {
+        Roles instance = Roles.instance;
+        if(!instance.players.containsKey(p.getUniqueId())) {
         	DB.update("INSERT INTO players (uuid,displayName) VALUES ('" + p.getUniqueId().toString() + "', '" + p.getName() + "')");
-        	p.setDisplayName(ChatColor.translateAlternateColorCodes('&', Roles.instance.rolesPrefix.get(Roles.instance.startingRole)) + " " + p.getName());
-        	p.setPlayerListName(ChatColor.translateAlternateColorCodes('&', Roles.instance.rolesPrefix.get(Roles.instance.startingRole)) + " " + p.getName());
-        	Roles.instance.load();
+        	DB.update("ISERT INTO rolePairs VALUES ('" + UUID.randomUUID().toString() + "','" + instance.getRankUUID(instance.startingRole) + "', '" + p.getUniqueId() + "')");
+        	instance.players.put(p.getUniqueId(), instance.getRankUUID(instance.startingRole));
         }
     }
 	

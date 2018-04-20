@@ -7,6 +7,7 @@ import org.bukkit.entity.Player;
 
 import maki325.roles.Roles;
 import maki325.roles.api.Command;
+import maki325.roles.api.Rank;
 import maki325.roles.utils.DB;
 
 public class CommandCreate extends Command {
@@ -25,12 +26,12 @@ public class CommandCreate extends Command {
 		
 		Roles instance = Roles.instance;
 		
-		if(instance.roles.containsValue(args[0])) {
+		if(instance.hasRank(args[0])) {
         	player.sendMessage("That role already exists");
         	return;
 		} else {
-			DB.update("INSERT INTO `roles` VALUES ('" + UUID.randomUUID().toString() + "', '" + args[0] + "', '[" + args[0] + "]', '')");
-        	Roles.instance.load();
+			DB.update("INSERT INTO `roles` VALUES ('" + UUID.randomUUID().toString() + "', '" + args[0] + "', '', '')");
+			instance.ranks.put(player.getUniqueId(), new Rank(args[0]));
 		}
 		
 		return;

@@ -27,36 +27,47 @@ public class CommandRole extends Command {
 		}
 		
 		Roles instance = Roles.instance;
+		if(!instance.hasRank(args[1])) {
+			player.sendMessage(ChatColor.RED + "Role you requested does not exist");
+			return;
+		}
+		
 		if(args.length == 2) {
-			if(!instance.roles.containsValue(args[1])) {
-				player.sendMessage(ChatColor.RED + "Role you requested does not exist");
-				return;
-			}
 			if(args[0].equalsIgnoreCase("view")) {
-				if(!instance.playerRoles.containsValue(args[1])) {
+				if(!instance.players.containsValue(instance.getRankUUID(args[1]))) {
 					player.sendMessage(ChatColor.RED + "The role has no players in it");
 					return;
 				}
 				player.sendMessage(ChatColor.GREEN + "Players in role " + args[1] + " are: " + ChatColor.RESET);
-				for(UUID s:instance.playerRoles.keySet()) {
-					if(instance.playerRoles.get(s).equals(args[1])) {
+				for(UUID s:instance.players.keySet()) {
+					if(instance.players.get(s).equals(instance.getRankUUID(name))) {
 						player.sendMessage(" - " + Bukkit.getPlayer(s).getName());
 					}
 				}
 				return;
 			} else if(args[0].equalsIgnoreCase("reset")) {
 				
-				DB.update("DELETE FROM rolePairs WHERE roleid = '" + instance.uuidFormName(args[1]).toString() + "'" );
+				DB.update("DELETE FROM rolePairs WHERE roleid = '" + instance.getRankUUID(args[1]).toString() + "'" );
 				
-				instance.load();
+				for(UUID id:instance.players.keySet()) {
+					if(instance.players.get(id).equals(instance.getRankUUID(args[1]))) {
+						instance.players.remove(id);
+					}
+				}
 				
 				player.sendMessage(ChatColor.GREEN + "You removed all player from " + args[1] + " role");
 				return;
 			} else if(args[0].equalsIgnoreCase("destroy")) {
-				DB.update("DELETE FROM rolePairs WHERE roleid = '" + instance.uuidFormName(args[1]).toString() + "'" );
-				DB.update("DELETE FROM roles WHERE uuid = '" + instance.uuidFormName(args[1]).toString() + "'" );
-
-				instance.load();
+				DB.update("DELETE FROM rolePairs WHERE roleid = '" + instance.getRankUUID(args[1]).toString() + "'" );
+				DB.update("DELETE FROM roles WHERE uuid = '" + instance.getRankUUID(args[1]).toString() + "'" );
+				
+				instance.ranks.remove(instance.getRankUUID(args[1]));
+				
+				for(UUID id:instance.players.keySet()) {
+					if(instance.players.get(id).equals(instance.getRankUUID(args[1]))) {
+						instance.players.remove(id);
+					}
+				}
 			} else {
 				commandUsage(player);
 				return;
@@ -64,31 +75,23 @@ public class CommandRole extends Command {
 		}
 		
 		if(args.length == 3) {
-			if(!instance.roles.containsValue(args[1])) {
-				player.sendMessage(ChatColor.RED + "Role you requested does not exist");
-				return;
-			}
 			if(args[0].equalsIgnoreCase("add")) {
 				
-				DB.update("DELETE FROM rolePairs WHERE playerid = '" + Bukkit.getPlayer(args[0]).getUniqueId().toString() + "'" );
+				DB.update("DELETE FROM rolePairs WHERE playerid = '" + Bukkit.getPlayer(args[2]).getUniqueId().toString() + "'" );
 				
-				DB.update("INSERT INTO rolePairs VALUES ('" + UUID.randomUUID().toString() + "', '" + instance.uuidFormName(args[2]).toString() + "', '" + Bukkit.getPlayer(args[0]).getUniqueId().toString() + "')");
+				DB.update("INSERT INTO rolePairs VALUES ('" + UUID.randomUUID().toString() + "', '" + instance.getRankUUID(args[1]).toString() + "', '" + Bukkit.getPlayer(args[2]).getUniqueId().toString() + "')");
 				
-				Player pl = Bukkit.getPlayer(args[0]);
-				if(Bukkit.getOnlinePlayers().contains(pl)) {
-					Bukkit.getPlayer(args[0]).setDisplayName(ChatColor.translateAlternateColorCodes('&', instance.rolesPrefix.get(args[2])) + " " + pl.getName());
-					Bukkit.getPlayer(args[0]).setDisplayName(ChatColor.translateAlternateColorCodes('&', instance.rolesPrefix.get(args[2])) + " " + pl.getName());
-				}
-				
-				instance.load();
+				instance.players.remove(Bukkit.getPlayer(args[2]).getUniqueId());
+				instance.players.put(Bukkit.getPlayer(args[2]).getUniqueId(), instance.getRankUUID(args[1]));
 				
 				player.sendMessage(ChatColor.GREEN + "You added player " + args[2] + " to role " + args[1]);
 				return;
 			} else if(args[0].equalsIgnoreCase("remove")) {
 				
-				DB.update("DELETE FROM rolePairs WHERE roleid = '" + instance.uuidFormName(args[1]).toString() + "' AND playerid = '" + Bukkit.getPlayer(args[0]).getUniqueId().toString() + "'" );
-
-				instance.load();
+				DB.update("DELETE FROM rolePairs WHERE playerid = '" + Bukkit.getPlayer(args[2]).getUniqueId().toString() + "'" );
+				DB.update("INSERT INTO rolePairs VALUES ('" + UUID.randomUUID().toString() + "', '" + instance.getRankUUID(instance.startingRole).toString() + "', '" + Bukkit.getPlayer(args[2]).getUniqueId().toString() + "')");
+				
+				instance.players.remove(Bukkit.getPlayer(args[2]).getUniqueId());
 				
 				player.sendMessage(ChatColor.GREEN + "You removed player " + args[2] + " from role " + args[1]);
 				return;

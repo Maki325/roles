@@ -2,9 +2,3 @@ roles:
   start: 'member'
 message:
   format: '%s: %s'
-database:
-  host: ''
-  port: 3306
-  username: ''
-  database: ''
-  password: ''

@@ -30,24 +30,25 @@ public class CommandDisplay extends Command {
 				player.sendMessage(ChatColor.RED + "Usage: /display <set|view> <role> <args>");
 				return;
 			}
-			if(!instance.roles.containsValue(args[1])) {
+			if(!instance.hasRank(args[1])) {
 				player.sendMessage(ChatColor.RED + "Role you requested does not exist");
 				return;
 			}
 			
-			player.sendMessage("Role display is: " + ChatColor.translateAlternateColorCodes('&', instance.rolesPrefix.get(args[1])) + " ExampleName");
+			player.sendMessage("Role display is: " + ChatColor.translateAlternateColorCodes('&', instance.ranks.get(instance.getRankUUID(args[1])).getName() + " ExampleName"));
 			
 		} if(args[0].equalsIgnoreCase("set")) {
 			if(args.length != 3) {
 				player.sendMessage(ChatColor.RED + "Usage: /display <set|view> <role> <prefix>");
 				return;
 			}
-			if(!instance.roles.containsValue(args[1])) {
+			if(!instance.hasRank(args[1])) {
 				player.sendMessage(ChatColor.RED + "Role you requested does not exist");
 				return;
 			}
 			
-			DB.update("UPDATE roles SET prefix = '" + args[2] + "' WHERE displayName = '" + args[1] + "'" );
+			DB.update("UPDATE roles SET prefix = '" + args[2] + "' WHERE uuid = '" + instance.getRankUUID(args[1]).toString() + "'" );
+			instance.ranks.get(instance.getRankUUID(args[1])).setPrefix(args[2]);
 			
 		}
 		
