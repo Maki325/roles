@@ -103,11 +103,6 @@ public class Roles extends JavaPlugin {
 	}
 	
 	public void setupDB() {
-		host = "old.mysql.anvilnode.com";
-		port = 3306;
-		username = "mc_4188";
-		database = "mc_4188";
-		password = "175c1fd1f5";
 		
 		synchronized (this){
 			try {
@@ -143,13 +138,13 @@ public class Roles extends JavaPlugin {
 	}
 	
 	public void load() {
-		ResultSet role = DB.query("SELECT * FROM `mc_4188`.`roles`");
+		ResultSet role = DB.query("SELECT * FROM `roles`");
         while(DB.next(role)) {
         	Rank temp = new Rank((String) DB.value(role, "displayName"), (String) DB.value(role, "prefix"), ((String) DB.value(role, "permissions")).split(";"));
 			ranks.put(UUID.fromString((String) DB.value(role, "uuid")), temp);
         }
         
-        ResultSet playerRank = DB.query("SELECT * FROM `mc_4188`.`rolePairs`");
+        ResultSet playerRank = DB.query("SELECT * FROM `rolePairs`");
         while(DB.next(playerRank)) {
         	players.put(UUID.fromString((String) DB.value(playerRank, "playerid")), UUID.fromString((String) DB.value(playerRank, "roleid")));
         }
